@@ -591,6 +591,7 @@ class SwinTransformer(nn.Module):
         self.features = nn.Sequential(*layers)
 
         num_features = embed_dim * 2 ** (len(depths) - 1)
+        self.num_features = num_features
         self.norm = norm_layer(num_features)
         self.permute = Permute([0, 3, 1, 2])  # B H W C -> B C H W
         self.avgpool = nn.AdaptiveAvgPool2d(1)
@@ -603,12 +604,16 @@ class SwinTransformer(nn.Module):
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
-    def forward(self, x):
+    def forward_features(self, x):
         x = self.features(x)
         x = self.norm(x)
         x = self.permute(x)
         x = self.avgpool(x)
         x = self.flatten(x)
+        return x
+
+    def forward(self, x):
+        x = self.forward_features(x)
         x = self.head(x)
         return x
 

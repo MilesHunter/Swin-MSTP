@@ -45,9 +45,10 @@ class SLRModel(nn.Module):
         self.num_classes = num_classes
         self.loss_weights = loss_weights
         self.conv2d = getattr(swin, c2d_type)(pretrained=True)
+        self.backbone_out_channels = self._get_backbone_out_channels()
  
 
-        self.conv1d_MS = MultiScale_TemporalConv(in_channels=384, out_channels=402, kernel_size=kernel_size, stride=stride, dilations=dilations,
+        self.conv1d_MS = MultiScale_TemporalConv(in_channels=self.backbone_out_channels, out_channels=402, kernel_size=kernel_size, stride=stride, dilations=dilations,
                                             residual=False )
         self.conv1d = TemporalConv(input_size=402,
                                    hidden_size=hidden_size,
@@ -77,10 +78,15 @@ class SLRModel(nn.Module):
             return torch.cat([tensor, tensor.new(length - tensor.size(0), *tensor.size()[1:]).zero_()])
 
         x = torch.cat([inputs[len_x[0] * idx:len_x[0] * idx + lgt] for idx, lgt in enumerate(len_x)])
-        x = self.conv2d(x)
+        x = self.conv2d.forward_features(x)
         x = torch.cat([pad(x[sum(len_x[:idx]):sum(len_x[:idx + 1])], len_x[0])
                        for idx, lgt in enumerate(len_x)])
         return x
+
+    def _get_backbone_out_channels(self):
+        if hasattr(self.conv2d, 'num_features'):
+            return self.conv2d.num_features
+        raise AttributeError(f"Backbone {self.conv2d.__class__.__name__} does not expose num_features")
 
     def forward(self, x, len_x, label=None, label_lgt=None):
         if len(x.shape) == 5:
