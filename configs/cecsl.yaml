@@ -1,0 +1,7 @@
+# Copy this file into Swin-MSTP/configs/cecsl.yaml
+# Then set the three absolute Linux paths below to your own paths.
+
+dataset_root: /hy-tmp/cecsl_swinmstp/frames
+dict_path: /hy-tmp/cecsl_swinmstp/preprocess/cecsl/gloss_dict.npy
+evaluation_dir: /hy-tmp/cecsl_swinmstp/preprocess/cecsl
+evaluation_prefix: cecsl-groundtruth
