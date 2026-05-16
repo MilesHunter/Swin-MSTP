@@ -34,7 +34,8 @@ class Processor():
             os.makedirs(self.arg.work_dir)
         shutil.copy2(__file__, self.arg.work_dir)
         shutil.copy2('./configs/baseline.yaml', self.arg.work_dir)
-        shutil.copy2('./modules/model.py', self.arg.work_dir)
+        # shutil.copy2('./modules/model.py', self.arg.work_dir)
+        shutil.copy2('./slr_network_Swin_MSTP.py', self.arg.work_dir)
 
         if self.arg.random_fix:
             self.rng = utils.RandomState(seed=self.arg.random_seed)
